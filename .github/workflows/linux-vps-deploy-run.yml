@@ -39,31 +39,31 @@ jobs:
     - name: Stop service
       uses: appleboy/ssh-action@master
       with:
-        host: ${{ secrets.HOST }}
-        username: ${{ secrets.USERNAME }}
-        key: ${{ secrets.SSHKEY }}
-        passphrase: ${{ secrets.SSHPASSPHRASE }}
+        host: ${{ inputs.host }}
+        username: ${{ inputs.username }}
+        key: ${{ inputs.ssh-key }}
+        passphrase: ${{ inputs.ssh-passphrase }}
         script: | 
           sudo systemctl stop kestrel-${{ inputs.application-name }}.service
           
     - name: Copy artifact via scp
       uses: appleboy/scp-action@master
       with:
-        host: ${{ secrets.HOST }}
-        username: ${{ secrets.USERNAME }}
-        key: ${{ secrets.SSHKEY }}
-        passphrase: ${{ secrets.SSHPASSPHRASE }}
+        host: ${{ inputs.host }}
+        username: ${{ inputs.username }}
+        key: ${{ inputs.ssh-key }}
+        passphrase: ${{ inputs.ssh-passphrase }}
         strip_components: 1
         source: "dist/*"
-        target: "../../var/www/PhotographyApi"
+        target: "../../var/www/${{ inputs.application-name }}"
 
     - name: Start service
       uses: appleboy/ssh-action@master
       with:
-        host: ${{ secrets.HOST }}
-        username: ${{ secrets.USERNAME }}
-        key: ${{ secrets.SSHKEY }}
-        passphrase: ${{ secrets.SSHPASSPHRASE }}
+        host: ${{ inputs.host }}
+        username: ${{ inputs.username }}
+        key: ${{ inputs.ssh-key }}
+        passphrase: ${{ inputs.ssh-passphrase }}
         script: | 
-          sudo systemctl start kestrel-photographyapi.service
-          sudo systemctl status kestrel-photographyapi.service
+          sudo systemctl start kestrel-${{ inputs.application-name }}.service
+          sudo systemctl status kestrel-${{ inputs.application-name }}.service
