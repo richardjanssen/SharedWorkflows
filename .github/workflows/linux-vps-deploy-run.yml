@@ -21,7 +21,7 @@ on:
 
 jobs:
   deploy-run:
-    needs: build-test-publish
+  
     runs-on: ubuntu-latest
 
     steps:
@@ -33,7 +33,7 @@ jobs:
     - name: Download artifact
       uses: actions/download-artifact@v3
       with:
-        name: PhotographyApi
+        name: ${{ inputs.application-name }}
         path: dist
     
     - name: Stop service
@@ -44,7 +44,7 @@ jobs:
         key: ${{ secrets.SSHKEY }}
         passphrase: ${{ secrets.SSHPASSPHRASE }}
         script: | 
-          sudo systemctl stop kestrel-photographyapi.service
+          sudo systemctl stop kestrel-${{ inputs.application-name }}.service
           
     - name: Copy artifact via scp
       uses: appleboy/scp-action@master
