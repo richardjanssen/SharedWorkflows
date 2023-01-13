@@ -1,0 +1,45 @@
+name: linux-vps-deploy-run
+
+on:
+  workflow_call:
+    inputs:
+      application-name:
+        required: true
+        type: string
+    secrets:
+      host:
+        required: true
+      username:
+        required: true
+      ssh-key:
+        required: true
+      ssh-passphrase:
+        required: true
+
+jobs:
+  deploy-run:
+  
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Create dist folder
+      run: mkdir ~/dist
+      
+    - name: Download artifact
+      uses: actions/download-artifact@v3
+      with:
+        name: ${{ inputs.application-name }}
+        path: dist
+          
+    - name: Copy artifact via scp
+      uses: appleboy/scp-action@master
+      with:
+        host: ${{ secrets.host }}
+        username: ${{ secrets.username }}
+        key: ${{ secrets.ssh-key }}
+        passphrase: ${{ secrets.ssh-passphrase }}
+        strip_components: 1
+        source: "dist/*"
+        target: "../../var/www/${{ inputs.application-name }}"
