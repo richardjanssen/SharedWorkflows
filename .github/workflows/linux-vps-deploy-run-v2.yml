@@ -61,6 +61,7 @@ jobs:
         username: ${{ secrets.username }}
         key: ${{ secrets.ssh-key }}
         passphrase: ${{ secrets.ssh-passphrase }}
+        rm: ${{ inputs.remove-target-folder }}
         strip_components: 1
         source: "dist/*"
         target: "../../var/www/${{ inputs.app-name }}"
