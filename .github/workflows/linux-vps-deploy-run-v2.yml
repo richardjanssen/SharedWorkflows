@@ -1,0 +1,78 @@
+name: linux-vps-deploy-run
+
+on:
+  workflow_call:
+    inputs:
+      app-name:
+        description: 'Determines target folder and should correspond with Kestrel service name when applicable'
+        required: true
+        type: string
+      is-service:
+        description: 'Determines if app is run as a Kestrel service and should thus be stopped/started'
+        required: true
+        type: boolean
+      remove-target-folder:
+        description: 'Determines if target folder is deleted before copying new files'
+        required: false
+        type: boolean
+        default: false
+    secrets:
+      host:
+        required: true
+      username:
+        required: true
+      ssh-key:
+        required: true
+      ssh-passphrase:
+        required: true
+
+jobs:
+  deploy-run:
+  
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Create dist folder
+      run: mkdir ~/dist
+      
+    - name: Download artifact
+      uses: actions/download-artifact@v3
+      with:
+        name: ${{ inputs.app-name }}
+        path: dist
+    
+    - name: Stop service
+      if: ${{ inputs.is-service }}
+      uses: appleboy/ssh-action@master
+      with:
+        host: ${{ secrets.host }}
+        username: ${{ secrets.username }}
+        key: ${{ secrets.ssh-key }}
+        passphrase: ${{ secrets.ssh-passphrase }}
+        script: | 
+          sudo systemctl stop kestrel-${{ inputs.app-name }}.service
+          
+    - name: Copy artifact via scp
+      uses: appleboy/scp-action@master
+      with:
+        host: ${{ secrets.host }}
+        username: ${{ secrets.username }}
+        key: ${{ secrets.ssh-key }}
+        passphrase: ${{ secrets.ssh-passphrase }}
+        strip_components: 1
+        source: "dist/*"
+        target: "../../var/www/${{ inputs.app-name }}"
+
+    - name: Start service
+      if: ${{ inputs.is-service }}
+      uses: appleboy/ssh-action@master
+      with:
+        host: ${{ secrets.host }}
+        username: ${{ secrets.username }}
+        key: ${{ secrets.ssh-key }}
+        passphrase: ${{ secrets.ssh-passphrase }}
+        script: | 
+          sudo systemctl start kestrel-${{ inputs.app-name }}.service
+          sudo systemctl status kestrel-${{ inputs.app-name }}.service
