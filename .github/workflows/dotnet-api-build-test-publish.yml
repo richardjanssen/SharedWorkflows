@@ -6,6 +6,16 @@ on:
       api-name:
         required: true
         type: string
+      do-checkout:
+        description: 'Whether the checkout step should be performed'
+        required: false
+        type: boolean
+        default: true
+      do-upload:
+        description: 'Whether the upload build artifact step should be performed'
+        required: false
+        type: boolean
+        default: true
 
 jobs:
   build-test-publish:
@@ -13,7 +23,9 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v4.1.1
+    - name: Checkout
+      if: ${{ inputs.do-checkout }}
+      uses: actions/checkout@v4.1.1
     - name: Setup .NET
       uses: actions/setup-dotnet@v3
       with:
@@ -27,6 +39,7 @@ jobs:
     - name: Publish
       run: dotnet publish ${{ inputs.api-name }}/${{ inputs.api-name }}.csproj -c Release -o dist
     - name: Upload a Build Artifact
+      if: ${{ success() && inputs.do-upload }}
       uses: actions/upload-artifact@v4
       with:
         name: ${{ inputs.api-name }}
