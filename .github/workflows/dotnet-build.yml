@@ -19,6 +19,13 @@ jobs:
     steps:
     - name: Checkout
       uses: actions/checkout@v4.1.1
+    - name: Substitute Secrets in appsettings.Production.json
+      if: ${{ success() && inputs.release-build }}
+      uses: Lambdaspire/action-substitute-secrets-in-file@v1.1.0
+      with:
+        file: ${{ inputs.app-name }}/appsettings.Production.json
+        tokenPattern: '##{TOKEN}##'
+        secretsJson: ${{ toJSON(secrets) }}
     - name: .NET Setup
       uses: actions/setup-dotnet@v3
       with:
@@ -33,13 +40,6 @@ jobs:
     - name: .NET Publish
       if: ${{ success() && inputs.release-build }}
       run: dotnet publish ${{ inputs.app-name }}/${{ inputs.app-name }}.csproj -c Release -o dist
-    - name: Substitute Secrets in appsettings.Production.json
-      if: ${{ success() && inputs.release-build }}
-      uses: Lambdaspire/action-substitute-secrets-in-file@v1.1.0
-      with:
-        file: ${{ inputs.app-name }}/appsettings.Production.json
-        tokenPattern: '##{TOKEN}##'
-        secretsJson: ${{ toJSON(secrets) }}
     - name: Upload Build Artifact
       if: ${{ success() && inputs.release-build }}
       uses: actions/upload-artifact@v4
