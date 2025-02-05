@@ -18,7 +18,6 @@ jobs:
 
     steps:
     - name: Checkout
-      if: ${{ inputs.do-checkout }}
       uses: actions/checkout@v4.1.1
     - name: .NET Setup
       uses: actions/setup-dotnet@v3
