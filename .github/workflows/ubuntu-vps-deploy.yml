@@ -1,11 +1,21 @@
-name: linux-vps-deploy-run
+name: Ubuntu VPS deploy
 
 on:
   workflow_call:
     inputs:
-      application-name:
+      app-name:
+        description: 'Determines target folder and should correspond with Kestrel service name when applicable'
         required: true
         type: string
+      is-service:
+        description: 'Determines if app is run as a Kestrel service and should thus be stopped/started'
+        required: true
+        type: boolean
+      remove-target-folder:
+        description: 'Determines if target folder is deleted before copying new files'
+        required: false
+        type: boolean
+        default: false
     secrets:
       host:
         required: true
@@ -18,11 +28,10 @@ on:
 
 jobs:
   deploy-run:
-  
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v4.1.1
+    - uses: actions/checkout@v3
     
     - name: Create dist folder
       run: mkdir ~/dist
@@ -30,10 +39,11 @@ jobs:
     - name: Download artifact
       uses: actions/download-artifact@v4
       with:
-        name: ${{ inputs.application-name }}
+        name: ${{ inputs.app-name }}
         path: dist
     
     - name: Stop service
+      if: ${{ inputs.is-service }}
       uses: appleboy/ssh-action@master
       with:
         host: ${{ secrets.host }}
@@ -41,7 +51,7 @@ jobs:
         key: ${{ secrets.ssh-key }}
         passphrase: ${{ secrets.ssh-passphrase }}
         script: | 
-          sudo systemctl stop kestrel-${{ inputs.application-name }}.service
+          sudo systemctl stop kestrel-${{ inputs.app-name }}.service
           
     - name: Copy artifact via scp
       uses: appleboy/scp-action@master
@@ -50,11 +60,13 @@ jobs:
         username: ${{ secrets.username }}
         key: ${{ secrets.ssh-key }}
         passphrase: ${{ secrets.ssh-passphrase }}
+        rm: ${{ inputs.remove-target-folder }}
         strip_components: 1
         source: "dist/*"
-        target: "../../var/www/${{ inputs.application-name }}"
+        target: "../../var/www/${{ inputs.app-name }}"
 
     - name: Start service
+      if: ${{ inputs.is-service }}
       uses: appleboy/ssh-action@master
       with:
         host: ${{ secrets.host }}
@@ -62,5 +74,5 @@ jobs:
         key: ${{ secrets.ssh-key }}
         passphrase: ${{ secrets.ssh-passphrase }}
         script: | 
-          sudo systemctl start kestrel-${{ inputs.application-name }}.service
-          sudo systemctl status kestrel-${{ inputs.application-name }}.service
+          sudo systemctl start kestrel-${{ inputs.app-name }}.service
+          sudo systemctl status kestrel-${{ inputs.app-name }}.service

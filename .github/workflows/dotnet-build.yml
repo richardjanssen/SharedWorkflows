@@ -1,0 +1,50 @@
+name: .NET Build
+
+on:
+  workflow_call:
+    inputs:
+      app-name:
+        required: true
+        type: string
+      release-build:
+        description: 'Indicates if this is a release build. Publishes and uploads artifact when true'
+        required: false
+        type: boolean
+        default: false
+
+jobs:
+  Build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout
+      if: ${{ inputs.do-checkout }}
+      uses: actions/checkout@v4.1.1
+    - name: .NET Setup
+      uses: actions/setup-dotnet@v3
+      with:
+        dotnet-version: 8.0.x
+    - name: Restore dependencies
+      run: dotnet restore
+    - name: .NET Build
+      run: dotnet build --no-restore
+    - name: .NET Test
+      if: ${{ success() }}
+      run: dotnet test --no-build --verbosity normal
+    - name: .NET Publish
+      if: ${{ success() && inputs.release-build }}
+      run: dotnet publish ${{ inputs.app-name }}/${{ inputs.app-name }}.csproj -c Release -o dist
+    - name: Substitute Secrets in appsettings.Production.json
+      if: ${{ success() && inputs.release-build }}
+      uses: Lambdaspire/action-substitute-secrets-in-file@v1.1.0
+      with:
+        file: ${{ inputs.app-name }}/appsettings.Production.json
+        tokenPattern: '##{TOKEN}##'
+        secretsJson: ${{ toJSON(secrets) }}
+    - name: Upload Build Artifact
+      if: ${{ success() && inputs.release-build }}
+      uses: actions/upload-artifact@v4
+      with:
+        name: ${{ inputs.app-name }}
+        path: dist/**
+        if-no-files-found: error
