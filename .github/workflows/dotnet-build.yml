@@ -13,7 +13,7 @@ on:
         default: false
 
 jobs:
-  Build:
+  build:
     runs-on: ubuntu-latest
 
     steps:
