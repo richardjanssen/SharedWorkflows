@@ -47,10 +47,9 @@ jobs:
       run: dotnet publish ${{ inputs.app-name }}/${{ inputs.app-name }}.csproj -c Release -o dist
     - name: Create EF bundle
       if: ${{ success() && inputs.release-build && inputs.has-database }}
-      run: dotnet ef migrations bundle --self-contained -r linux-x64
-    - name: Move EF bundle into dist
-      if: ${{ success() && inputs.release-build && inputs.has-database }}
       run: |
+        dotnet tool install --global dotnet-ef
+        dotnet ef migrations bundle --startup-project ${{ inputs.app-name }} --project Data.Repository --self-contained --target-runtime linux-x64
         mv efbundle.exe dist/
     - name: Upload Build Artifact
       if: ${{ success() && inputs.release-build }}
