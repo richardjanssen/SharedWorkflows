@@ -30,6 +30,8 @@ on:
         required: true
       ssh-passphrase:
         required: true
+      connection-string:
+        required: true
 
 jobs:
   deploy-run:
@@ -80,6 +82,9 @@ jobs:
         passphrase: ${{ secrets.ssh-passphrase }}
         script: | 
           sudo sqlite3 ../../var/www/${{ inputs.app-name }}/data/Riesj.db ''
+          sudo chown ${{ secrets.username }} ../../var/www/${{ inputs.app-name }}/data/Riesj.db
+          sudo chmod +x ../../var/www/${{ inputs.app-name }}/efbundle
+          sudo ../../var/www/${{ inputs.app-name }}/efbundle --connection ${{ secrets.connection-string }}
 
     - name: Start service
       if: ${{ inputs.is-service }}
