@@ -45,7 +45,5 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: ${{ inputs.app-name }}
-        path: |
-          dist/**
-          .deploy/**
+        path: dist/**
         if-no-files-found: error

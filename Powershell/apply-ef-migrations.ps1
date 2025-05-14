@@ -10,4 +10,4 @@ param(
 
 "Your dbPath is: $dbPath"
 
-sqlite3 $dbPath '.read Sql/dbversion.sql'
+sqlite3 $dbPath '.read Sql/dbversion.sql'¡
