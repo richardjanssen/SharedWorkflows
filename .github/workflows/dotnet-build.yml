@@ -50,7 +50,7 @@ jobs:
       run: |
         dotnet tool install --global dotnet-ef
         dotnet ef migrations bundle --startup-project ${{ inputs.app-name }} --project Data.Repository --self-contained --target-runtime linux-x64
-        mv efbundle.exe dist/
+        mv efbundle dist/
     - name: Upload Build Artifact
       if: ${{ success() && inputs.release-build }}
       uses: actions/upload-artifact@v4
