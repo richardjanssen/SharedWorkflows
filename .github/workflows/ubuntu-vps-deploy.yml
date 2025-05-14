@@ -11,6 +11,11 @@ on:
         description: 'Determines if app is run as a Kestrel service and should thus be stopped/started'
         required: true
         type: boolean
+      has-database:
+        description: 'Determines if app has a database to which migrations should be applied'
+        required: false
+        type: boolean
+        default: false
       remove-target-folder:
         description: 'Determines if target folder is deleted before copying new files'
         required: false
@@ -64,6 +69,17 @@ jobs:
         strip_components: 1
         source: "dist/*"
         target: "../../var/www/${{ inputs.app-name }}"
+
+    - name: Apply database migrations
+      if: ${{ inputs.is-service && inputs.has-database }}
+      uses: appleboy/ssh-action@master
+      with:
+        host: ${{ secrets.host }}
+        username: ${{ secrets.username }}
+        key: ${{ secrets.ssh-key }}
+        passphrase: ${{ secrets.ssh-passphrase }}
+        script: | 
+          sudo sqlite3 ../../var/www/${{ inputs.app-name }}/data/Riesj.db ''
 
     - name: Start service
       if: ${{ inputs.is-service }}

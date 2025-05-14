@@ -1,0 +1,6 @@
+# For local development
+Data/
+
+# Visual Studio Code configuration
+.vs/
+
