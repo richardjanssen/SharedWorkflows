@@ -31,7 +31,7 @@ on:
       ssh-passphrase:
         required: true
       connection-string:
-        required: true
+        required: false
 
 jobs:
   deploy-run:
