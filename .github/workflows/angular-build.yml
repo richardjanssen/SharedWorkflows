@@ -41,7 +41,7 @@ jobs:
       run: npm run test:ci
     - name: Install Playwright Browsers
       if: ${{ success() && inputs.has-playwright }}
-      run: npx playwright install --with-deps
+      run: npx playwright install chromium --with-deps
     - name: Run Playwright tests
       if: ${{ success() && inputs.has-playwright }}
       run: npx playwright test
