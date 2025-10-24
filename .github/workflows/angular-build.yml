@@ -50,7 +50,7 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: playwright-report
-        path: playwright-report/
+        path: playwright/results
         retention-days: 30
     - name: Upload a Build Artifact
       if: ${{ success() && inputs.release-build }}
