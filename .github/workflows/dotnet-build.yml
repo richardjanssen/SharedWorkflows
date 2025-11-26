@@ -48,7 +48,7 @@ jobs:
     - name: Create EF bundle
       if: ${{ success() && inputs.release-build && inputs.has-database }}
       run: |
-        dotnet tool install --global dotnet-ef
+        dotnet tool install --global dotnet-ef --version 8.0.22
         dotnet ef migrations bundle --startup-project ${{ inputs.app-name }} --project Data.Repository --self-contained --target-runtime linux-x64
         mv efbundle dist/
     - name: Upload Build Artifact
